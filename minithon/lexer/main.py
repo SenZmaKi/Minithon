@@ -34,8 +34,8 @@ class TokenType(Enum):
     # Datatypes
     BOOL_TRUE = r"\bTrue\b"
     BOOL_FALSE = r"\bFalse\b"
-    INTEGER = r"\d+"
     FLOAT = r"\d+\.\d+"
+    INTEGER = r"\d+"
     STRING = r"\".*?\"|\'.*?\'"
 
     # Punctuation
