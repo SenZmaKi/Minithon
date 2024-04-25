@@ -1,7 +1,7 @@
 jambo_dunia = "Jambo Dunia!"
 
 # Checks if the number is even or odd
-number_1 = 7
+number = 7
 is_even = False
 if number % 2 == 0:
   is_even = True
@@ -23,7 +23,6 @@ else:
             is_prime = False
             break
         i = i + 6
-
 
 # Checks if the number is perfect (is equal to the sum of its proper divisors excluding itself)
 number = 28

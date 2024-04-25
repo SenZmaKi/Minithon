@@ -69,7 +69,7 @@ class UnexpectedToken(Exception):
 
 
 def tokenize(
-    code: str, stop_on_error=True
+    code: str, stop_on_error=False
 ) -> tuple[list[Token], list[UnexpectedToken]]:
     tokens_specification = [(t.name, t.value) for t in TokenType]
     all_tokens_regex = "|".join(
