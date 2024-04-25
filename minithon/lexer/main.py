@@ -63,30 +63,41 @@ class UnexpectedToken(Exception):
         highlighter = (" " * token_line_pos) + ("^" * len(token))
         err = f"{line}\n{highlighter}"
         line_number = code[:pos].count("\n") + 1
-        super().__init__(f'\033[31mUnexpected token "{token}" at line {line_number}:\n{err}\033[0m')
+        super().__init__(
+            f'\033[31mUnexpected token "{token}" at line {line_number}:\n{err}\033[0m'
+        )
 
 
-def tokenize(code: str) -> list[Token]:
+def tokenize(
+    code: str, stop_on_error=True
+) -> tuple[list[Token], list[UnexpectedToken]]:
     tokens_specification = [(t.name, t.value) for t in TokenType]
     all_tokens_regex = "|".join(
         f"(?P<{name}>{pattern})" for name, pattern in tokens_specification
     )
     tokens: list[Token] = []
     pos = 0
+    exceptions: list[UnexpectedToken] = []
     for match_object in re.finditer(all_tokens_regex, code):
         if match_object.start() != pos:
-            raise UnexpectedToken(
+            e = UnexpectedToken(
                 code,
                 pos,
             )
+            if stop_on_error:
+                raise e
+            exceptions.append(e)
         kind = cast(str, match_object.lastgroup)
         value = match_object.group()
         token = Token(value, TokenType[kind])
         tokens.append(token)
         pos = match_object.end()
     if pos != len(code):
-        raise UnexpectedToken(
+        e = UnexpectedToken(
             code,
             pos,
         )
-    return tokens
+        if stop_on_error:
+            raise e
+        exceptions.append(e)
+    return tokens, exceptions
