@@ -1,4 +1,39 @@
-s1 = ; 
-n = 4
-"
-p = 1
+jambo_dunia = "Jambo Dunia!"
+
+# Checks if the number is even or odd
+number_1 = 7
+is_even = False
+if number % 2 == 0:
+  is_even = True
+
+
+# Checks if the number is prime
+is_prime = True
+if number <= 1:
+    is_prime = False
+elif number <= 3:
+    is_prime = True
+elif number % 2 == 0 or number % 3 == 0:
+    is_prime = False
+else:
+    i = 5
+    while i * i <= number:
+        j = i + 2
+        if number % i == 0 or number % 2 == 0:
+            is_prime = False
+            break
+        i = i + 6
+
+
+# Checks if the number is perfect (is equal to the sum of its proper divisors excluding itself)
+number = 28
+sum_of_divisors = 0
+divisor = 1
+is_perfect = False
+while divisor < number:
+    if number % divisor == 0:
+        sum_of_divisors += divisor
+    divisor += 1
+
+if sum_of_divisors == number:
+  is_perfect = True
