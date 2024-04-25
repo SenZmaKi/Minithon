@@ -10,12 +10,13 @@ def main() -> None:
     with open(CURR_ROOT_DIR / "test.mipy") as f:
         contents = f.read()
         start_time = time.time()
-        stop_on_error = True
+        stop_on_error = False
         tokens, exceptions = tokenize(contents, stop_on_error)
         runtime = time.time() - start_time
         pprint(tokens)
         if not stop_on_error:
-            [print(e) for e in exceptions]
+            for e in exceptions:
+                print(e)
         print(f"Runtime: {runtime:.4f} seconds")
 
 
