@@ -63,7 +63,7 @@ class UnexpectedToken(Exception):
         highlighter = (" " * token_line_pos) + ("^" * len(token))
         err = f"{line}\n{highlighter}"
         line_number = code[:pos].count("\n") + 1
-        super().__init__(f'Unexpected token "{token}" at line {line_number}:\n{err}')
+        super().__init__(f'\033[31mUnexpected token "{token}" at line {line_number}:\n{err}\033[0m')
 
 
 def tokenize(code: str) -> list[Token]:
