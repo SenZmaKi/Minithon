@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import NamedTuple, cast
 import re
+from functools import cache
 
 
 class TokenType(Enum):
@@ -48,6 +49,12 @@ class TokenType(Enum):
     IDENTIFIER = r"[a-zA-Z_]\w*"
 
 
+@cache
+def all_tokens_regex():
+    tokens_specification = [(t.name, t.value) for t in TokenType]
+    return "|".join(f"(?P<{name}>{pattern})" for name, pattern in tokens_specification)
+
+
 class Token(NamedTuple):
     lexeme: str
     type: TokenType
@@ -71,14 +78,10 @@ class UnexpectedToken(Exception):
 def tokenize(
     code: str, stop_on_error=False
 ) -> tuple[list[Token], list[UnexpectedToken]]:
-    tokens_specification = [(t.name, t.value) for t in TokenType]
-    all_tokens_regex = "|".join(
-        f"(?P<{name}>{pattern})" for name, pattern in tokens_specification
-    )
     tokens: list[Token] = []
     pos = 0
     exceptions: list[UnexpectedToken] = []
-    for match_object in re.finditer(all_tokens_regex, code):
+    for match_object in re.finditer(all_tokens_regex(), code):
         if match_object.start() != pos:
             e = UnexpectedToken(
                 code,

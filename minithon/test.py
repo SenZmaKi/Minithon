@@ -1,4 +1,4 @@
-from .main import tokenize
+from minithon.lexer import Token, tokenize
 from pprint import pprint
 from pathlib import Path
 import time
@@ -6,7 +6,7 @@ import time
 CURR_ROOT_DIR = Path(__file__).parent
 
 
-def main() -> None:
+def test_lexer() -> list[Token]:
     with open(CURR_ROOT_DIR / "test.mipy") as f:
         contents = f.read()
         start_time = time.time()
@@ -18,7 +18,12 @@ def main() -> None:
             for e in exceptions:
                 print(e)
         print(f"Runtime: {runtime:.4f} seconds")
+        return tokens
+
+
+def test_parser(tokens: list[Token]): ...
 
 
 if __name__ == "__main__":
-    main()
+    tokens = test_lexer()
+    test_parser(tokens)
