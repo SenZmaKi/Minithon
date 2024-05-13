@@ -3,6 +3,28 @@ from typing import NamedTuple, cast
 import re
 from functools import cache
 
+from minithon.common import CommonException
+
+
+class OperatorType(Enum):
+    # Arithmetic
+    ADD = r"\+"
+    SUBTRACT = r"-"
+    MULTIPLY = r"\*"
+    DIVIDE = r"/"
+    MODULUS = r"%"
+    # Logical
+    EQUAL = r"=="
+    GREATER_THAN_OR_EQUAL = r">="
+    LESS_THAN_OR_EQUAL = r"<="
+    NOT_EQUAL = r"!="
+    GREATER_THAN = r">"
+    LESS_THAN = r"<"
+    ASSIGN = r"="  # Assignment
+    AND = r"\band\b"
+    OR = r"\bor\b"
+    NOT = r"\bnot\b"
+
 
 class TokenType(Enum):
     COMMENT = r"#.*"
@@ -18,16 +40,20 @@ class TokenType(Enum):
     CONTINUE = r"\bcontinue\b"
 
     # Operators
-    PLUS = r"\+"
-    MINUS = r"-"
+    # Arithmetic
+    ADD = r"\+"
+    SUBTRACT = r"-"
     MULTIPLY = r"\*"
     DIVIDE = r"/"
     MODULUS = r"%"
+    # Logical
     EQUAL = r"=="
+    GREATER_THAN_OR_EQUAL = r">="
+    LESS_THAN_OR_EQUAL = r"<="
     NOT_EQUAL = r"!="
     GREATER_THAN = r">"
     LESS_THAN = r"<"
-    ASSIGN = r"="
+    ASSIGN = r"="  # Assignment
     AND = r"\band\b"
     OR = r"\bor\b"
     NOT = r"\bnot\b"
@@ -40,50 +66,47 @@ class TokenType(Enum):
     STRING = r"\".*?\"|\'.*?\'"
 
     # Punctuation
+    LPAREN = r"\("
+    RPAREN = r"\)"
     COLON = r":"
     NEWLINE = r"\n"
-    WHITESPACE = r"\s+"
+    WHITESPACE = r"\s"
 
     # Misc
     PASS = r"\bpass\b"
     IDENTIFIER = r"[a-zA-Z_]\w*"
+    EOF = r"$"
 
 
 @cache
-def all_tokens_regex():
+def all_tokens_regex() -> str:
     tokens_specification = [(t.name, t.value) for t in TokenType]
-    return "|".join(f"(?P<{name}>{pattern})" for name, pattern in tokens_specification)
+    combined = "|".join(
+        f"(?P<{name}>{pattern})" for name, pattern in tokens_specification
+    )
+    return combined
 
 
 class Token(NamedTuple):
     lexeme: str
     type: TokenType
+    position: int
 
 
-class UnexpectedToken(Exception):
-    def __init__(self, code: str, pos: int) -> None:
-        line_start_pos = code.rfind("\n", 0, pos) + 1 if pos != 0 else 0
-        line_end_pos = code.find("\n", pos)
-        line = code[line_start_pos:line_end_pos]
-        token_line_pos = pos - line_start_pos
-        token = line[token_line_pos:].split(" ", 1)[0]
-        highlighter = (" " * token_line_pos) + ("^" * len(token))
-        err = f"{line}\n{highlighter}"
-        line_number = code[:pos].count("\n") + 1
-        super().__init__(
-            f'\033[31mUnexpected token "{token}" at line {line_number}:\n{err}\033[0m'
-        )
+class UnrecognizedToken(CommonException):
+    def __init__(self, source_code: str, position: int) -> None:
+        super().__init__("Unrecognized token", source_code, position, True)
 
 
 def tokenize(
     code: str, stop_on_error=False
-) -> tuple[list[Token], list[UnexpectedToken]]:
+) -> tuple[list[Token], list[UnrecognizedToken]]:
     tokens: list[Token] = []
     pos = 0
-    exceptions: list[UnexpectedToken] = []
+    exceptions: list[UnrecognizedToken] = []
     for match_object in re.finditer(all_tokens_regex(), code):
         if match_object.start() != pos:
-            e = UnexpectedToken(
+            e = UnrecognizedToken(
                 code,
                 pos,
             )
@@ -92,11 +115,11 @@ def tokenize(
             exceptions.append(e)
         kind = cast(str, match_object.lastgroup)
         value = match_object.group()
-        token = Token(value, TokenType[kind])
+        token = Token(value, TokenType[kind], pos)
         tokens.append(token)
         pos = match_object.end()
     if pos != len(code):
-        e = UnexpectedToken(
+        e = UnrecognizedToken(
             code,
             pos,
         )
