@@ -1,4 +1,5 @@
 from PrettyPrint.PrintLinkedList.LinkedListPrinter import Callable
+from minithon.icg import ICG
 from minithon.lexer import Token, tokenize
 from pprint import pprint
 from pathlib import Path
@@ -19,7 +20,7 @@ def get_source_code() -> str:
 def print_runtime_later(task: str) -> Callable[[], None]:
     start_time = time.time()
 
-    def callback():
+    def callback() -> None:
         end_time = time.time()
         runtime = end_time - start_time
         print(f"{task} runtime: {runtime:.4f} seconds")
@@ -28,7 +29,7 @@ def print_runtime_later(task: str) -> Callable[[], None]:
 
 
 def test_lexer(
-    source_code: str | None, show_output=True, stop_on_error=False
+    source_code: str | None = None, show_output=True, stop_on_error=False
 ) -> list[Token]:
     if source_code is None:
         source_code = get_source_code()
@@ -57,5 +58,18 @@ def test_parser(source_code: str | None = None, show_output=True) -> Program:
     return program
 
 
+def test_icg(source_code: str | None = None, show_output=True) -> str:
+    if source_code is None:
+        source_code = get_source_code()
+    program = test_parser(source_code, True)
+    icg = ICG()
+    prt = print_runtime_later("Intermediate Code Generator")
+    intermediate_code = icg.generate(program, source_code)
+    if show_output:
+        prt()
+        print(intermediate_code)
+    return intermediate_code
+
+
 if __name__ == "__main__":
-    test_parser()
+    test_icg()

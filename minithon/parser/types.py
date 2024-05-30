@@ -1,7 +1,15 @@
 from typing import Any, Sequence
 import colorama
+from minithon.common import CommonException
 from minithon.lexer import Token
 from PrettyPrint import PrettyPrintTree
+
+
+class SyntaxError(CommonException):
+    def __init__(
+        self, msg: str, source_code: str, position: int, print_token=True
+    ) -> None:
+        super().__init__(msg, source_code, position, print_token)
 
 
 class Node:
@@ -61,18 +69,18 @@ class Expression(NodeWrapper):
 
 class ControlFlowStmtBlock(NodeWrapper):
     def __init__(
-        self, statement: Token, expression: Expression | None, block: "Block"
+        self, keyword: Token, expression: Expression | None, block: "Block"
     ) -> None:
-        self.statement = statement
+        self.keyword = keyword
         self.expression = expression
         self.block = block
         super().__init__([block])
 
     def __str__(self) -> str:
         statement_string = (
-            f"{self.statement.lexeme} {self.expression}:"
+            f"{self.keyword.lexeme} {self.expression}:"
             if self.expression is not None
-            else f"{self.statement.lexeme}:"
+            else f"{self.keyword.lexeme}:"
         )
         block_string = str(self.block)
         spaces_count = (len(statement_string) - len(block_string)) // 2
@@ -88,7 +96,7 @@ class IfStatementBlock(NodeWrapper):
         else_statement: ControlFlowStmtBlock | None,
     ) -> None:
         self.if_statement = if_statement
-        self.elif_statement = elifs
+        self.elif_statements = elifs
         self.else_statement = else_statement
         children = [if_statement]
         children.extend(elifs)
@@ -160,7 +168,7 @@ class Program(NodeWrapper):
         def get_value(node_wrapper: NodeWrapper):
             return str(node_wrapper.node.value)
 
-        pt = PrettyPrintTree(get_children, get_value, color=colorama.Back.LIGHTCYAN_EX)  # type: ignore
+        pt = PrettyPrintTree(get_children, get_value, color=colorama.Back.BLUE)  # type: ignore
         pt(self)  # type: ignore
 
 

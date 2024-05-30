@@ -1,17 +1,10 @@
-# Checks if the number is prime
 number = 7
-is_prime = True
+is_true = True
 if number <= 1:
-    is_prime = False
-elif number <= 3:
-    is_prime = True
+    is_true = False
 elif number % 2 == 0 or number % 3 == 0:
-    is_prime = False
+    is_true = False
 else:
     i = 5
     while i * i <= number:
         j = i + 2
-        if number % i == 0 or number % 2 == 0:
-            is_prime = False
-            break
-        i = i + 6

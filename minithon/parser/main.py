@@ -10,6 +10,7 @@ from minithon.parser.types import (
     StatementType,
     Block,
     Program,
+    SyntaxError,
 )
 
 
@@ -49,8 +50,6 @@ class Parser:
 
     def block(self, prev_indent: int) -> Block | None:
         indent = self.get_indent()
-        if indent <= prev_indent:
-            self.raise_syntax_error("Expected an indented block")
         self.block_id += 1
         block_id_buffer = self.block_id
         statements: list[StatementType] = []
