@@ -98,8 +98,7 @@ class IfStatementBlock(NodeWrapper):
         self.if_statement = if_statement
         self.elif_statements = elifs
         self.else_statement = else_statement
-        children = [if_statement]
-        children.extend(elifs)
+        children = [if_statement, *elifs]
         if else_statement is not None:
             children.append(else_statement)
         super().__init__(children)
